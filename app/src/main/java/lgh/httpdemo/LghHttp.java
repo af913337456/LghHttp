@@ -69,6 +69,7 @@ public class LghHttp {
     public final static int ProtocolFailed = 0x13;
     public final static int EncodingFailed = 0x14;
     public final static int IOFailed = 0x15;
+    public final static int NetErr = 0x16;
 
     private final static boolean IsOpenCompress = true;/** 是否开启压缩 */
     private final static int CompressLimit = 500;      /** 压缩级别，单位是 K */
@@ -187,8 +188,23 @@ public class LghHttp {
         };
     }
 
+    /**
+     * 添加一个 直接使用 runnable 的接口
+     * */
+    public void doRun(Runnable runnable,LghHttpSingleListener lghHttpListeners){
+        if(!checkConnection()){
+            lghHttpListeners.onFailed(NetErr);
+            return;
+        }
+        if(threadPool != null){
+            threadPool.execute(runnable);
+        }else{
+            Log.d(TAG,"do get threadPool is null");
+        }
+    }
+
     /** handler 发消息部分整合 */
-    private void sendMessage(int what,int code,Object object){
+    public void sendMessage(int what,int code,Object object){
         Message msg = new Message();
         msg.what = what;
         msg.arg1 = code;
@@ -218,6 +234,10 @@ public class LghHttp {
             final String url,
             final LghHttpSingleListener lghHttpListeners)
     {
+        if(!checkConnection()){
+            lghHttpListeners.onFailed(NetErr);
+            return;
+        }
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -267,6 +287,10 @@ public class LghHttp {
             final String[] values,
             final LghHttpSingleListener listener
     ){
+        if(!checkConnection()){
+            lghHttpListeners.onFailed(NetErr);
+            return;
+        }
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -550,6 +574,26 @@ public class LghHttp {
         }
         outputStream.write(requestStr.toString().getBytes());
         return outputStream;
+    }
+
+    /** 网络判断
+    *   自己补全 context common.context
+    */
+    public static boolean checkConnection() {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) common.context.getSystemService(common.context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            if (networkInfo == null) {
+                //common.l("zzzzz", "无法连接网络");
+                Toast.makeText(common.context, "无法连接网络!", Toast.LENGTH_LONG).show();
+                return false;
+            } else {
+                return true;
+            }
+        }catch (Exception e){
+            Log.d("zzzzz",""+e.toString());
+            return false;
+        }
     }
 
     /** 接口分离 */
