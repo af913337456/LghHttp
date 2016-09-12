@@ -18,10 +18,11 @@ A simple but powerful Http tool for Android
       2, 采用 newFixedThreadPool 线程池来管理并发线程，
          如果要替换，建议使用 newCacheThreadPool
  
-      3, 功能方面提供三种常见操作：
+      3, 功能方面提供三（+1）种常见操作：
             1）Get请求
             2）Post请求
             3）图片上传
+            4）直接运行 runnable 接口（2016-9-12日更新）
       4, 优点:
             1) 绝对的轻量级，可以提升 APK 体积优化
             2）内存管理方面可以放心
