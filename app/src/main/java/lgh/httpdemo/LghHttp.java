@@ -288,7 +288,7 @@ public class LghHttp {
             final LghHttpSingleListener listener
     ){
         if(!checkConnection()){
-            lghHttpListeners.onFailed(NetErr);
+            listener.onFailed(NetErr);
             return;
         }
         Runnable runnable = new Runnable() {
